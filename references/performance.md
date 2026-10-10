@@ -44,6 +44,23 @@ node examples/_tools/perf.mjs ./dist "标签"
 
 ## 三条规则
 
+### 字体怎么选（实测）
+
+同一页（TaiWoo，手机 390 / Fast 3G / 4× CPU），只改字体来源：
+
+| 方案 | 传输总量 | 字体请求 | LCP | CLS |
+| --- | --- | --- | --- | --- |
+| Google Fonts 外链（默认写法） | 133 KB | 1（48KB）+ 一个 CSS 跨域请求 | **1.58 s** | 0.0003 |
+| **自托管 Inter latin 子集 + preload** | 132 KB | 1（47KB，同源） | **1.03 s** | 0.0003 |
+| 系统字体栈（不用 Web 字体） | **84 KB** | 0 | **0.89 s** | **0** |
+
+结论：
+
+1. **换字体家族本身不减字节**——Google 给的 Inter latin 是 47KB，自托管还是 47KB。省下来的是"连接"（DNS/TLS + 一个跨域 CSS 往返）。
+2. **减字重也没用**：Google 现在按 `font-weight: 300 600` 下发可变字体，一个字重范围就一个文件。
+3. 三个真正有效的动作：**自托管 + preload**（LCP −0.55s）→ **latin 子集**（本来就只有 latin）→ **干脆不用 Web 字体**（再省 47KB，CLS 归零）。
+4. 怎么选：客户有品牌字体要求 → 自托管 + preload；只求快、能接受各平台字形略有差异 → 系统字体栈。用 `examples/_tools/self-host-font.mjs` 一条命令把字体抓下来并生成要贴的代码。
+
 1. **动效默认用技能自带的那套**（首屏级联 + 滚动进场 + hover）：零请求、可关闭、不影响 CLS。
 2. **要上第三方动效库先读 [third-party-motion.md](third-party-motion.md)**：能复制重写就复制重写；真要嵌 React island，最多一处、用 `client:visible`、别放在 LCP 元素上。
 3. **每次交付前跑一次 `perf.mjs`**，把三个数字写进交付说明：传输总量、首屏 JS、LCP。客户问起来你有数据。

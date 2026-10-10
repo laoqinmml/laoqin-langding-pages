@@ -79,6 +79,16 @@ npm run preview -- --port 4322
 
 临时演示用：URL 加 `?motion=always`（例：`http://localhost:4321/?motion=always`），本次访问无视系统设置照常播放，不影响默认行为。
 
+### 字体：默认系统字体，要品牌字体就自托管
+
+默认走系统字体栈（0 字节、0 请求、CLS 归零）。客户有品牌字体要求时**不要外链 Google Fonts**——实测同一页外链 LCP 1.58s，自托管同一字体降到 1.03s（字节数一样，省的是跨域连接）：
+
+```bash
+node examples/_tools/self-host-font.mjs "Inter" "300..600" public/fonts
+```
+
+脚本会把 latin 子集的 woff2 抓到 `public/fonts/`，并打印要贴进 `global.css` 的 `@font-face` 和贴进 `Layout.astro` 的 `preload` 标签。详见 `references/performance.md`。
+
 ## 图片：草稿占位 → 确认换真图
 
 草稿阶段**不要留空、也不要随手塞大图**，统一用 `placehold.co` 占位（默认已经这么写了），尺寸按版面比例选：
