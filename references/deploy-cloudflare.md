@@ -46,6 +46,43 @@ npx wrangler d1 execute landing-leads --remote --file=./schema.sql -y
 npx wrangler d1 execute landing-leads --remote --command "select created_at,name,email,company,country,mail_status from leads order by id desc limit 20"
 ```
 
+### 本地调试 D1（不碰线上）
+
+```bash
+# 1. 先在 wrangler.jsonc 里声明绑定（本地模式 database_id 随便填，真实部署时换成 d1 create 输出的 id）
+#    "d1_databases": [{ "binding": "DB", "database_name": "landing-leads", "database_id": "..." }]
+
+# 2. 建本地库并建表
+npx wrangler d1 execute landing-leads --local --persist-to .wrangler/state --file=./schema.sql -y
+
+# 3. 起本地服务（不要传 --d1，见下面的坑）
+npx wrangler pages dev dist --persist-to .wrangler/state --port 5215
+
+# 4. 查本地数据
+npx wrangler d1 execute landing-leads --local --persist-to .wrangler/state --command "select * from leads"
+```
+
+**踩过的坑**：`pages dev --d1 DB=<名字>` 会按这个名字另建一个本地库，和 `d1 execute` 按绑定 id 建的库不是同一个文件——表现就是接口一直报 `no such table: leads`，而 `d1 execute` 又能正常建表。两边都走 `wrangler.jsonc` 里的绑定 + 同一个 `--persist-to` 才对得上。
+
+### 测带附件的表单
+
+表单用 `multipart/form-data` 提交（可带参考图），接口按 `request.formData()` 解析：附件 ≤5MB、类型限定 jpg/png/webp/pdf，随 Resend 通知邮件一起发走；D1 里只存 `attachment_name` 与 `attachment_size`，**没配邮件时文件不留存**（要在交付说明里写清）。
+
+本地实测**用 curl 发 multipart**：
+
+```bash
+curl -s -w "\nHTTP:%{http_code}\n" -X POST http://127.0.0.1:5222/api/contact \
+  -F "name=Test Buyer" -F "email=buyer@example.com" -F "sport=Cycling" \
+  -F "message=Cycling goggles, 2000 pairs" -F "submission_key=test-key-1" \
+  -F "attachment=@public/images/lab-design.webp;type=image/webp"
+```
+
+预期：正常 → `{"ok":true,"stored":true,...}`；重复 `submission_key` → `{"duplicate":true}`；蜜罐 → `{"ignored":true}`；6MB → 413；改成 `-F "attachment=@schema.sql"` → 400。
+
+**坑**：PowerShell 的 `Invoke-WebRequest -Form` 生成的 multipart 会被 Workers 判成 `Content-Disposition header in FormData part is missing a name`（连不带附件的也失败）——测 multipart 一律用 `curl -F`。接口遇到畸形 multipart 会返回 **400** 而不是 500。
+
+本地跑通后应该看到：正常提交 → `{"ok":true,"stored":true,"mailed":false}`；重复 submission_key → `{"ok":true,"stored":false,"duplicate":true}`；蜜罐命中 → `{"ok":true,"ignored":true}`；邮箱格式错 → 400。D1 里只有一行记录。
+
 ## 表单链路（顺序不能错）
 
 ```

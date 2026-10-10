@@ -1,9 +1,10 @@
 // @ts-check
 import { defineConfig } from "astro/config";
 import sitemap from "@astrojs/sitemap";
+import { config } from "./src/config.ts";
 
-// 换成客户真实域名：canonical、sitemap、og:url 都靠它。
-const SITE = "https://example.com";
+// 域名只在 src/config.ts 定义一处：canonical、sitemap、og:url 都用它。
+const SITE = config.domain;
 
 export default defineConfig({
   site: SITE,

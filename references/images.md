@@ -47,6 +47,39 @@
 
 客户给了实拍图：放进 `public/images/`，压缩到 ≤ 1800 px 宽 / JPEG q82，文件名用语义化 slug（`hero-factory.jpg`），`alt` 写清拍的是什么；`content.ts` 里的 URL 改成 `/images/hero-factory.jpg`。
 
+### 首选：直接用客户自己网站上的图
+
+客户要是已经有官网/落地页，**直接拉他们自己的图**——比 AI 生图真实、比占位图可信，而且图片本来就属于客户。
+
+```bash
+# 1. 从客户页面把所有图片地址抓出来（这里以 WordPress 站为例）
+#    正则匹配 src/data-src 的图片后缀，再去重
+# 2. 下载到项目里的 _downloads/（不要直接放进 public/，先压再放）
+# 3. 用技能自带脚本压缩（见下）
+# 4. content.ts 里改成 /images/<name>.webp，并在交付说明里写明图片来源
+```
+
+```bash
+node examples/_tools/optimize-images.mjs _downloads public/images jobs.json
+```
+
+`jobs.json` 长这样（键是输出名，值是原文件名与目标宽度）：
+
+```json
+{
+  "hero":         { "file": "raw-hero.webp", "width": 1200, "quality": 78, "avif": true },
+  "sport-cycling":{ "file": "raw-cycling.webp", "width": 900, "quality": 78 }
+}
+```
+
+实测数据（TaiWoo 单页，13 张图）：原图 **1012KB → 708KB**；首屏图 97KB → WebP 54KB → **AVIF 43KB**；整页首屏传输 108KB（占位图）→ 133KB（真图 + AVIF）。
+
+三条要点：
+
+1. **首屏图一定出 AVIF**，页面用 `<picture><source type="image/avif"><img …></picture>` 兜底，再配 `loading="eager" fetchpriority="high" decoding="async"` 和正确的 width/height。
+2. **其余图全部 `loading="lazy"`**，并按版面比例写死宽高或 CSS `aspect-ratio`（证书这类竖图用 `object-fit: contain`，别裁掉文字）。
+3. 图片是客户资产，但**交付说明里仍要写明来源**（"图片取自客户官网 xxx 页面"），别让客户以为是 AI 生成的。
+
 没有实拍、需要 AI 出图：用技能自带的生图脚本 `examples/_tools/gen_images.py`（OpenAI 兼容接口，带重试，出图即压缩）。
 
 ```bash

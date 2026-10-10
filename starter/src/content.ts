@@ -213,14 +213,28 @@ export const content = {
       email: "Work email",
       company: "Company (optional)",
       country: "Country (optional)",
+      sport: "Custom goggles for",
       message: "What do you need?",
     },
+    /** 下拉选项：按客户产品改；参考页有下拉就照抄它的选项 */
+    sportOptions: [
+      "Cycling",
+      "Running",
+      "Skiing",
+      "Outdoor & Mountain",
+      "Water Sports & Fishing",
+      "Ball, Contact & Precision Sports",
+      "Others",
+    ],
+    attachment: "Reference image (optional)",
+    attachmentHint: "JPG, PNG, WebP or PDF · up to 5 MB",
     messagePlaceholder:
       "Part name, material, quantity, target price, drawing or specification…",
     submit: "Send enquiry",
     sending: "Sending…",
     success: "Thanks. We will reply within one business day.",
     error: "Sending failed. Please try again, or email us directly.",
+    tooLarge: "The reference image must be under 5 MB.",
   },
 
   footer: {

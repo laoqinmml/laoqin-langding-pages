@@ -68,8 +68,25 @@ const whatsappUrl = contact.whatsapp
         <input id="f-country" name="country" type="text" autocomplete="country-name" />
       </div>
       <div class="field">
+        <label for="f-sport">{t.fields.sport}</label>
+        <select id="f-sport" name="sport">
+          <option value="">— Select —</option>
+          {t.sportOptions.map((option) => <option value={option}>{option}</option>)}
+        </select>
+      </div>
+      <div class="field">
         <label for="f-message">{t.fields.message}</label>
         <textarea id="f-message" name="message" placeholder={t.messagePlaceholder} required></textarea>
+      </div>
+      <div class="field">
+        <label for="f-attachment">{t.attachment}</label>
+        <input
+          id="f-attachment"
+          name="attachment"
+          type="file"
+          accept="image/jpeg,image/png,image/webp,application/pdf"
+        />
+        <span class="field__hint">{t.attachmentHint}</span>
       </div>
 
       <div class="honeypot" aria-hidden="true">
@@ -102,7 +119,7 @@ const whatsappUrl = contact.whatsapp
   define:vars={{
     endpoint: config.form.endpoint,
     thanksPath: config.form.thanksPath,
-    messages: { sending: t.sending, success: t.success, error: t.error },
+    messages: { sending: t.sending, success: t.success, error: t.error, tooLarge: t.tooLarge },
   }}
 >
   const form = document.getElementById("enquiry-form");
@@ -117,39 +134,37 @@ const whatsappUrl = contact.whatsapp
   if (form instanceof HTMLFormElement) {
     form.addEventListener("submit", async (event) => {
       event.preventDefault();
-      const data = new FormData(form);
+      const formData = new FormData(form);
       const params = new URLSearchParams(window.location.search);
       const submitBtn = form.querySelector('button[type="submit"]');
+      const fileInput = form.querySelector('input[type="file"]');
 
-      const payload = {
-        name: String(data.get("name") || "").trim(),
-        email: String(data.get("email") || "").trim(),
-        company: String(data.get("company") || "").trim(),
-        country: String(data.get("country") || "").trim(),
-        message: String(data.get("message") || "").trim(),
-        website: String(data.get("website") || ""),
-        turnstileToken: String(data.get("cf-turnstile-response") || ""),
-        submission_key:
-          window.crypto && window.crypto.randomUUID
-            ? window.crypto.randomUUID()
-            : `${Date.now()}-${Math.random().toString(16).slice(2)}`,
-        page_url: window.location.href,
-        utm_source: params.get("utm_source") || "",
-        utm_medium: params.get("utm_medium") || "",
-        utm_campaign: params.get("utm_campaign") || "",
-        gclid: params.get("gclid") || "",
-        fbclid: params.get("fbclid") || "",
-      };
+      // 没有选文件就把字段去掉，避免服务端收到空附件
+      if (fileInput && (!fileInput.files || fileInput.files.length === 0)) {
+        formData.delete("attachment");
+      }
+      if (fileInput && fileInput.files && fileInput.files.length > 0 && fileInput.files[0].size > 5 * 1024 * 1024) {
+        setStatus("error", messages.tooLarge);
+        return;
+      }
+
+      formData.set(
+        "submission_key",
+        window.crypto && window.crypto.randomUUID
+          ? window.crypto.randomUUID()
+          : `${Date.now()}-${Math.random().toString(16).slice(2)}`,
+      );
+      formData.set("page_url", window.location.href);
+      for (const key of ["utm_source", "utm_medium", "utm_campaign", "gclid", "fbclid"]) {
+        formData.set(key, params.get(key) || "");
+      }
 
       setStatus("pending", messages.sending);
       if (submitBtn) submitBtn.disabled = true;
 
       try {
-        const response = await fetch(endpoint, {
-          method: "POST",
-          headers: { "content-type": "application/json" },
-          body: JSON.stringify(payload),
-        });
+        // 用 multipart 提交（不带 content-type，让浏览器自己加 boundary），这样能带附件
+        const response = await fetch(endpoint, { method: "POST", body: formData });
         const result = await response.json().catch(() => ({}));
         if (!response.ok || !result.ok) throw new Error(result.error || "request failed");
 

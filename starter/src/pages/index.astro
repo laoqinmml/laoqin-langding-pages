@@ -26,7 +26,7 @@ const faqJsonLd = {
     {
       content.trust.length > 0 && (
         <div class="container">
-          <div class="trust">
+          <div class="trust" data-reveal>
             {content.trust.map((item) => (
               <div class="stat">
                 <span class="stat__value">{item.value}</span>
@@ -39,7 +39,7 @@ const faqJsonLd = {
     }
 
     <Section eyebrow={content.benefits.eyebrow} title={content.benefits.title} surface>
-      <div class="grid">
+      <div class="grid" data-reveal>
         {
           content.benefits.items.map((item) => (
             <article class="card">
@@ -57,7 +57,7 @@ const faqJsonLd = {
       eyebrow={content.products.eyebrow}
       title={content.products.title}
     >
-      <div class="grid">
+      <div class="grid" data-reveal>
         {
           content.products.items.map((item) => (
             <article class="card">
@@ -84,7 +84,7 @@ const faqJsonLd = {
       title={content.applications.title}
       surface
     >
-      <div class="grid">
+      <div class="grid" data-reveal>
         {
           content.applications.items.map((item) => (
             <div class="card">
@@ -101,7 +101,7 @@ const faqJsonLd = {
       eyebrow={content.capabilities.eyebrow}
       title={content.capabilities.title}
     >
-      <div class="grid">
+      <div class="grid" data-reveal>
         {
           content.capabilities.items.map((item) => (
             <div class="stat card">
@@ -120,7 +120,7 @@ const faqJsonLd = {
       title={content.process.title}
       surface
     >
-      <div class="grid">
+      <div class="grid" data-reveal>
         {
           content.process.modes.map((mode) => (
             <div class="card">
@@ -130,7 +130,7 @@ const faqJsonLd = {
           ))
         }
       </div>
-      <div class="steps" style="margin-top: var(--space-5)">
+      <div class="steps" data-reveal style="margin-top: var(--space-5)">
         {
           content.process.steps.map((item) => (
             <div class="card">
@@ -153,7 +153,7 @@ const faqJsonLd = {
     </Section>
 
     <Section id="faq" eyebrow={content.faq.eyebrow} title={content.faq.title} surface>
-      <div class="grid">
+      <div class="grid" data-reveal>
         {
           content.faq.items.map((item) => (
             <article class="card">

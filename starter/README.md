@@ -8,7 +8,7 @@
 # 1. 复制到项目目录
 cp -r <skill>/starter ./my-landing-page && cd ./my-landing-page   # Windows: Copy-Item -Recurse
 
-# 2. 改两个文件（见下表），把 astro.config.mjs 里的 SITE 换成真实域名
+# 2. 改两个文件（见下表）：域名/品牌/联系方式在 src/config.ts，文案在 src/content.ts
 
 # 3. 本地预览
 npm install
@@ -23,6 +23,28 @@ npx wrangler pages project create <project> --production-branch main            
 npx wrangler pages deploy dist --project-name <project> --branch main
 ```
 
+## 本地预览：三种方式
+
+| 想验证什么 | 命令 | 地址 |
+| --- | --- | --- |
+| 改文案 / 样式，热更新 | `npm run dev` | http://localhost:4321 |
+| 生产构建的结果（就是上线那一份） | `npm run build && npm run preview` | http://localhost:4321 |
+| 表单能不能收（Pages Function + 本地 D1） | `npx wrangler pages dev dist --persist-to .wrangler/state --port 5215` | http://localhost:5215 |
+
+**注意**：`npm run dev` 和 `npm run preview` 都不跑 Pages Function，`POST /api/contact` 会返回 404（页面上会显示提交失败）。**要测表单必须用 `wrangler pages dev`**，并先按 `references/deploy-cloudflare.md` 建好本地 D1 表。
+
+`npm run preview` 默认端口也是 4321，和 dev 同时开要换端口：
+
+```bash
+npm run preview -- --port 4322
+```
+
+### 给客户或同事看
+
+- **同一台电脑**：直接开上面的地址。
+- **同一局域网（手机上看真机效果）**：`npm run dev -- --host`，用输出里的 `Network:` 地址（形如 `http://192.168.1.23:4321/`），手机连同一个 Wi-Fi 即可；`wrangler pages dev` 可加 `--ip 0.0.0.0` 供局域网访问。
+- **对方不在同一网络 / 不方便开服务**：用截图自审那套出图发过去（`node examples/_tools/shots.mjs` + `python examples/_tools/sheet.py`）。**不要为了给对方看一眼就去部署。**
+
 ## 要改的就两个文件
 
 | 文件 | 改什么 |
@@ -31,6 +53,31 @@ npx wrangler pages deploy dist --project-name <project> --branch main
 | `src/content.ts` | 所有页面文案：首屏、信任条、卖点、产品、应用、产能、合作方式、流程、资质、FAQ、表单文案、页脚 |
 
 页面组件只从这两个文件取值。不要在 `.astro` 里写死邮箱、电话、域名。
+
+## 动效：默认带一套极简的，别自己发挥
+
+内置三种，都已经写在 `global.css` + `Layout.astro` 里，不需要额外配置：
+
+| 动效 | 触发 | 实现 |
+| --- | --- | --- |
+| 首屏载入级联 | 页面加载 | `.hero > *` 的 `rise-in` 动画（纯 CSS，不走 JS，避免首屏闪烁） |
+| 区块滚动进场 | 容器进入视口 | 容器加 `data-reveal`，`Layout.astro` 里的 IntersectionObserver 加 `.is-visible`，子元素按 `nth-child` 每级 60ms 级联 |
+| hover 反馈 | 鼠标悬停 | 卡片描边变亮 + 上浮 2px；按钮上浮 1px；ghost 按钮反色 |
+
+规矩：
+
+- 时长短、统一缓动：`--motion-fast/base/slow` = 160 / 320 / 620ms，`--ease-out`。
+- **`prefers-reduced-motion: reduce` 下必须立即可见**：不做进场、不做位移，hover 也不位移。已在 CSS 里处理，改动效时别破坏这一层。
+- 内容不能因为 JS 失败而消失：`<html class="js-reveal">` 由 head 里的内联脚本在首帧前加上，`<noscript>` 兜住禁用 JS 的情况，IntersectionObserver 2.5 秒一次都没回调才全部显示。
+- 想做更花的动效（滚动联动、Canvas / WebGL）先问客户；B2B 落地页动效太多会让采购觉得不专业，**默认一处大胆、其余克制**。
+- 想直接嵌第三方动效组件库（React Bits / Vengeance UI / Animata）先读技能里的 `references/third-party-motion.md`：它们都是 React 组件，默认路线是"复制源码改写成我们的令牌"，真嵌 React island 会给项目加运行时（其中两个还要 Tailwind）。
+
+### 看不到动效？先查这两件事
+
+1. **系统是不是关了动画**：浏览器控制台跑 `matchMedia("(prefers-reduced-motion: reduce)").matches`，返回 `true` 就是系统要求"减少动态效果"——按规范动效就该是关的，**代码没坏**。Windows 的开关在 设置 → 辅助功能 → 视觉效果 → 动画效果。
+2. **自动化截图里看不到动效是正常的**：无头浏览器默认上报 `reduce`，所以截图验证的其实是"内容完整可见"这条兜底线。
+
+临时演示用：URL 加 `?motion=always`（例：`http://localhost:4321/?motion=always`），本次访问无视系统设置照常播放，不影响默认行为。
 
 ## 图片：草稿占位 → 确认换真图
 

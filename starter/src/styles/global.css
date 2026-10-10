@@ -228,6 +228,7 @@ p {
 }
 
 .field input,
+.field select,
 .field textarea {
   width: 100%;
   padding: 0.7rem 0.8rem;
@@ -236,6 +237,41 @@ p {
   background: #fff;
   font: inherit;
   color: inherit;
+}
+
+.field select {
+  appearance: none;
+  background-image:
+    linear-gradient(45deg, transparent 50%, var(--c-ink-soft) 50%),
+    linear-gradient(135deg, var(--c-ink-soft) 50%, transparent 50%);
+  background-position:
+    calc(100% - 20px) 1.15em,
+    calc(100% - 14px) 1.15em;
+  background-size: 6px 6px;
+  background-repeat: no-repeat;
+}
+
+.field input[type="file"] {
+  padding: 0.55rem 0.8rem;
+  color: var(--c-ink-soft);
+  cursor: pointer;
+}
+
+.field input[type="file"]::file-selector-button {
+  margin-right: 0.6rem;
+  padding: 0.35rem 0.7rem;
+  border: 1px solid var(--c-line);
+  border-radius: var(--radius);
+  background: var(--c-ink);
+  color: var(--c-on-accent);
+  font: inherit;
+  font-size: var(--step--1);
+  cursor: pointer;
+}
+
+.field__hint {
+  font-size: var(--step--1);
+  color: var(--c-ink-soft);
 }
 
 .field textarea {
@@ -387,5 +423,240 @@ p {
 @media (prefers-reduced-motion: reduce) {
   html {
     scroll-behavior: auto;
+  }
+}
+
+/* ============================================================
+   动效基线：克制、可关闭
+   - 首屏载入级联（纯 CSS，不经过 JS，避免首屏闪烁）
+   - 区块滚动进场：容器标 data-reveal，容器内的直接子元素级联出现
+   - hover 反馈：卡片描边变亮 + 轻微上浮（不用阴影）
+   - prefers-reduced-motion: reduce 下一律立即可见，不做进场
+   ============================================================ */
+
+@keyframes rise-in {
+  from {
+    opacity: 0;
+    transform: translateY(16px);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+.hero > * {
+  animation: rise-in var(--motion-slow) var(--ease-out) both;
+}
+
+.hero > *:nth-child(2) {
+  animation-delay: 90ms;
+}
+
+/* 由 <html class="js-reveal"> 开启（Layout 里的内联脚本在首帧前加上） */
+.js-reveal [data-reveal] > * {
+  opacity: 0;
+  transform: translateY(12px);
+}
+
+.js-reveal [data-reveal].is-visible > * {
+  opacity: 1;
+  transform: none;
+  transition:
+    opacity var(--motion-slow) var(--ease-out),
+    transform var(--motion-slow) var(--ease-out);
+}
+
+.js-reveal [data-reveal].is-visible > *:nth-child(1) { transition-delay: 0ms; }
+.js-reveal [data-reveal].is-visible > *:nth-child(2) { transition-delay: 60ms; }
+.js-reveal [data-reveal].is-visible > *:nth-child(3) { transition-delay: 120ms; }
+.js-reveal [data-reveal].is-visible > *:nth-child(4) { transition-delay: 180ms; }
+.js-reveal [data-reveal].is-visible > *:nth-child(5) { transition-delay: 240ms; }
+.js-reveal [data-reveal].is-visible > *:nth-child(n + 6) { transition-delay: 300ms; }
+
+.card {
+  transition:
+    border-color var(--motion-base) var(--ease-out),
+    transform var(--motion-base) var(--ease-out);
+}
+
+.card:hover {
+  border-color: var(--c-ink);
+  transform: translateY(-2px);
+}
+
+.btn {
+  transition:
+    transform var(--motion-fast) var(--ease-out),
+    background-color var(--motion-fast) var(--ease-out),
+    color var(--motion-fast) var(--ease-out);
+}
+
+.btn:hover {
+  transform: translateY(-1px);
+}
+
+.btn--ghost:hover {
+  background: var(--c-ink);
+  color: var(--c-on-accent);
+}
+
+a {
+  transition: color var(--motion-fast) var(--ease-out);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .hero > * {
+    animation: none;
+  }
+
+  .js-reveal [data-reveal] > * {
+    opacity: 1;
+    transform: none;
+    transition: none;
+  }
+
+  .card:hover,
+  .btn:hover {
+    transform: none;
+  }
+}
+
+/* 演示开关：URL 加 ?motion=always 时，无视系统的"减少动态效果"照常播放。
+   只用于演示与验收 —— 默认尊重系统设置才是正确行为。 */
+.force-motion .hero > * {
+  animation: rise-in var(--motion-slow) var(--ease-out) both;
+}
+
+.force-motion .hero > *:nth-child(2) {
+  animation-delay: 90ms;
+}
+
+/* 演示开关下，滚动进场也要真的播（否则会被 reduce 的"立即可见"覆盖掉） */
+.force-motion.js-reveal [data-reveal] > * {
+  opacity: 0;
+  transform: translateY(12px);
+}
+
+.force-motion.js-reveal [data-reveal].is-visible > * {
+  opacity: 1;
+  transform: none;
+  transition:
+    opacity var(--motion-slow) var(--ease-out),
+    transform var(--motion-slow) var(--ease-out);
+}
+
+/* ============================================================
+   WhatsApp 浮动按钮（右侧固定）+ 图片区块
+   ============================================================ */
+
+/* 品牌色例外：客户认得这个绿，识别度直接决定点不点。
+   只有 config.contact.whatsapp 有号码时才渲染（见 WhatsAppFab.astro）。 */
+.wa-fab {
+  position: fixed;
+  right: 20px;
+  bottom: 20px;
+  z-index: 50;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 13px;
+  border-radius: 999px;
+  background: #25d366;
+  color: #ffffff;
+  font-weight: 600;
+  font-size: var(--step--1);
+  text-decoration: none;
+  border: 1px solid rgba(255, 255, 255, 0.22);
+  box-shadow: 0 14px 30px -14px rgba(0, 0, 0, 0.55);
+  transition:
+    transform var(--motion-fast) var(--ease-out),
+    background-color var(--motion-fast) var(--ease-out);
+}
+
+.wa-fab:hover {
+  background: #1ebe5d;
+  transform: translateY(-2px);
+}
+
+.wa-fab:focus-visible {
+  outline: 3px solid rgba(37, 211, 102, 0.45);
+  outline-offset: 3px;
+}
+
+.wa-fab__icon {
+  width: 26px;
+  height: 26px;
+  fill: currentColor;
+  flex: none;
+}
+
+.wa-fab__label {
+  display: none;
+}
+
+/* 宽屏才显示文字，手机上是纯圆形按钮，不挡内容 */
+@media (min-width: 700px) {
+  .wa-fab__label {
+    display: inline;
+    padding-right: 0.35rem;
+  }
+}
+
+/* 图片墙（例如自动化车间、案例照片）；证书这类竖图用 .docs */
+.gallery {
+  display: grid;
+  gap: var(--space-3);
+  grid-template-columns: repeat(auto-fit, minmax(min(240px, 100%), 1fr));
+  margin: var(--space-4) 0;
+}
+
+.gallery__item {
+  margin: 0;
+  min-width: 0;
+}
+
+.gallery__item img {
+  width: 100%;
+  aspect-ratio: 3 / 2;
+  object-fit: cover;
+  border-radius: var(--radius-lg);
+  border: 1px solid var(--c-line);
+  background: var(--c-surface);
+}
+
+.gallery__item figcaption {
+  margin-top: var(--space-2);
+  font-size: var(--step--1);
+  color: var(--c-ink-soft);
+}
+
+.docs {
+  display: grid;
+  gap: var(--space-3);
+  grid-template-columns: repeat(auto-fit, minmax(min(260px, 100%), 1fr));
+  margin-top: var(--space-4);
+}
+
+.docs__item {
+  margin: 0;
+}
+
+.docs__item img {
+  width: 100%;
+  aspect-ratio: 2 / 3;
+  object-fit: contain;
+  border-radius: var(--radius-lg);
+  border: 1px solid var(--c-line);
+  background: var(--c-surface);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .wa-fab {
+    transition: background-color var(--motion-fast) var(--ease-out);
+  }
+
+  .wa-fab:hover {
+    transform: none;
   }
 }

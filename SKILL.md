@@ -74,10 +74,14 @@ metadata:
 ```bash
 cp -r <skill>/starter ./my-landing-page       # Windows 用 Copy-Item -Recurse
 npm install
-npm run dev                                  # 本地预览
+npm run dev                                                          # 看页面 http://localhost:4321（加 --host 手机可同一局域网访问）
+npm run build && npm run preview                                     # 看生产构建（默认也是 4321，同时开用 --port 4322）
+npx wrangler pages dev dist --persist-to .wrangler/state --port 5215 # 测表单：带 Pages Function + 本地 D1
 ```
 
 只需改两个文件：`src/config.ts`（品牌名、联系方式、开关）和 `src/content.ts`（所有页面文案）。工程结构、组件分层、样式令牌、多页怎么加、每页要过哪些 SEO 检查，见 [references/astro-project.md](references/astro-project.md)。
+
+三种本地预览的分工：`dev`/`preview` 只能看页面（都没有 Pages Function，表单提交会 404），**测表单必须用 `wrangler pages dev`**；给客户看优先发截图，或让他用 `--host` 输出的局域网地址在自己手机上打开，别为了演示去部署。完整说明见 [starter/README.md](starter/README.md)。
 
 规矩：页面里不写内联样式，不发明新组件形态（先查 `src/components/`，缺什么补进去再复用）；品牌名、电话、邮箱、域名只在 `src/config.ts` 定义一处。
 
@@ -127,6 +131,8 @@ npx wrangler pages deploy dist --project-name <project> --branch main
 - `dist/` 里有 `robots.txt`、`sitemap.xml`、`404`、`llms.txt`、`webmcp.json`
 - 手机 390 宽下 `scrollWidth === innerWidth`，无横向滚动
 - console 报错 0、4xx 0
+- 动效守规：`prefers-reduced-motion: reduce` 下内容立即可见（截图自审默认就是这个状态）；位移只出现在 hover；时长在 160/320/620ms 三档内
+- 跑一次 `node examples/_tools/perf.mjs ./dist`，把**传输总量 / 首屏 JS / LCP** 三个数字写进交付说明（见 [references/performance.md](references/performance.md)）
 - 图片：草稿用 `placehold.co` 占位（尺寸与版面比例一致）；上线前确认已全部换成真图，没换的在交付说明里写明
 - 用了 DESIGN.md 或参考截图时：硬规矩逐条对过（圆角、强调色出现次数、大小写、字距、阴影），并和参考图并排比一次
 - 表单：正常提交 / 蜜罐命中 / 伪造 token 被拒 / 重复提交被忽略（配了哪几项就测哪几项）
@@ -146,17 +152,19 @@ npx wrangler pages deploy dist --project-name <project> --branch main
 
 5. 装饰性超大图形一定加 `html, body { overflow-x: clip; }`，否则手机端必然横向滚动。
 6. 手机端 `grid-template-columns: 1fr` 仍会被长内容撑破，用 `minmax(0, 1fr)`，或给该列字号加 clamp。
-7. 无头浏览器会把 `prefers-reduced-motion` 报成 `reduce`。滚动联动的效果（sticky 段、进度线）是「随用户滚动而变」不是自动播放，应当照常开，只要静态画面下内容仍可读。
+7. 无头浏览器会把 `prefers-reduced-motion` 报成 `reduce`：滚动联动的效果（sticky 段、进度线）是「随用户滚动而变」不是自动播放，应当照常开，只要静态画面下内容仍可读；而进场淡入这类自动播放的动画，在 reduce 下必须**立即可见**——截图看到的正是这个状态，截图里内容没缺就说明兜底对了。
 8. 扁平色块上的照片：`filter: grayscale(1) contrast(1.15)` + `mix-blend-mode: multiply` + 底色，比直接贴彩照更贴设计系统。
 
 **表单与上线**
 
-9. 表单链路顺序不能错：解析请求体 → 蜜罐 → 必填/格式校验 → Turnstile 服务端 siteverify → 频率限制 → **先写 D1，再发邮件**。邮件失败不能丢询盘。
-10. `submission_key UNIQUE` 是幂等键（前端 `crypto.randomUUID()`），重复提交自动忽略。有 D1 时邮件失败也返回成功；无 D1 时邮件是唯一通道，失败必须返回 500。
-11. Turnstile 测试密钥（`1x…`）任何 token 都通过，忘了换真实密钥等于表单裸奔。
-12. noindex 三层锁要同时改（页面 meta、`robots.txt`、`_headers` 的 `X-Robots-Tag`），漏一处就白锁。
-13. Cloudflare 的 Email Address Obfuscation 默认开着，会把页面上的 `mailto:` 改写成 `/cdn-cgi/l/email-protection`；邮箱点不了就去 Scrape Shield 关掉。
-14. wrangler 的 OAuth token 每 1 小时过期；直连 Cloudflare API 报 401/403，先 `npx wrangler whoami` 刷新。
+9. **在 `npm run dev` 里测表单会 404**：dev 和 preview 都不跑 Pages Function，`/api/contact` 根本不存在。测表单只能用 `wrangler pages dev dist`。
+10. 本地 D1 要用 `wrangler.jsonc` 里的绑定：`pages dev --d1 DB=<名字>` 会另建一个本地库，表现是接口一直报 `no such table: leads`。两边都用配置绑定 + 同一个 `--persist-to`。
+11. 表单链路顺序不能错：解析请求体 → 蜜罐 → 必填/格式校验 → Turnstile 服务端 siteverify → 频率限制 → **先写 D1，再发邮件**。邮件失败不能丢询盘。
+12. `submission_key UNIQUE` 是幂等键（前端 `crypto.randomUUID()`），重复提交自动忽略。有 D1 时邮件失败也返回成功；无 D1 时邮件是唯一通道，失败必须返回 500。
+13. Turnstile 测试密钥（`1x…`）任何 token 都通过，忘了换真实密钥等于表单裸奔。
+14. noindex 三层锁要同时改（页面 meta、`robots.txt`、`_headers` 的 `X-Robots-Tag`），漏一处就白锁。
+15. Cloudflare 的 Email Address Obfuscation 默认开着，会把页面上的 `mailto:` 改写成 `/cdn-cgi/l/email-protection`；邮箱点不了就去 Scrape Shield 关掉。
+16. wrangler 的 OAuth token 每 1 小时过期；直连 Cloudflare API 报 401/403，先 `npx wrangler whoami` 刷新。
 
 ## 这个技能里带的东西
 
@@ -168,6 +176,9 @@ npx wrangler pages deploy dist --project-name <project> --branch main
 | `references/design-md.md` | 可选项：用 styles.refero.design 的 DESIGN.md 定风格，结构解读、映射进 tokens.css、Do/Don't 转自检项 |
 | `references/screenshot-to-code.md` | 可选项：客户发来喜欢的网站截图，怎么要图、提取什么、两条执行路径（含 abi/screenshot-to-code）、边界与并排自审 |
 | `references/astro-project.md` | Astro 工程：目录、组件分层、样式令牌、多页扩展与依赖规则、SEO/可访问性清单 |
+| `references/third-party-motion.md` | 想嵌 React Bits / Vengeance UI / Animata 这类动效库时：三条接入路径、依赖代价、四条红线、决策表 |
+| `references/performance.md` | 性能预算与实测：`examples/_tools/perf.mjs` 怎么跑、动效与 React island 的真实开销对照、交付前必报的三个数字 |
+| `examples/_tools/optimize-images.mjs` | 把客户给的原图按宽度压成 WebP（首屏图可选出 AVIF），配 jobs.json 使用 |
 | `references/deploy-cloudflare.md` | Cloudflare Pages 全流程：部署命令、密钥分类、D1/Turnstile/Resend、noindex 锁、域名、线上验证 |
 | `references/content-and-keywords.md` | 持续出内容：关键词导入、写作前分析、信息增益、反批量垃圾内容 |
 | `references/images.md` | 图片两阶段：placehold.co 语法与尺寸表、换真图、生图 API 的 jobs JSON 与边界 |

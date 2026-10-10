@@ -41,6 +41,8 @@ npm run check      # astro check：类型与常见错误
 npm run build      # 产物在 dist/
 ```
 
+**本地预览三种方式**：`npm run dev`（改文案/样式，热更新）→ `npm run build && npm run preview`（看上线那一份构建）→ `npx wrangler pages dev dist --persist-to .wrangler/state --port 5215`（测表单，带 Pages Function + 本地 D1）。前两种都没有 Pages Function，**表单提交会 404**。手机上看真机效果：`npm run dev -- --host`，用输出里的 `Network:` 地址（同一 Wi-Fi）。详细说明见 [starter/README.md](starter/README.md)。
+
 只改两个文件就能换一个客户：
 
 | 文件 | 改什么 |

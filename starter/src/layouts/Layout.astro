@@ -1,6 +1,7 @@
 ---
 import { config } from "../config";
 import { content } from "../content";
+import WhatsAppFab from "../components/WhatsAppFab.astro";
 import "../styles/tokens.css";
 import "../styles/global.css";
 
@@ -42,9 +43,68 @@ const orgJsonLd = {
     <meta property="og:description" content={description} />
     <meta property="og:url" content={canonical} />
     <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
+    {/* 动效开关：在首帧前给 <html> 打标记，避免内容先显示再隐藏造成闪烁 */}
+    <script is:inline>
+      document.documentElement.classList.add("js-reveal");
+      // 演示开关：URL 加 ?motion=always 时，即使系统要求"减少动态效果"也照常播放（仅供演示/验收）
+      if (new URLSearchParams(location.search).get("motion") === "always") {
+        document.documentElement.classList.add("force-motion");
+      }
+    </script>
+    <noscript>
+      <style>
+        .js-reveal [data-reveal] > * {
+          opacity: 1 !important;
+          transform: none !important;
+        }
+      </style>
+    </noscript>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&display=swap"
+      rel="stylesheet"
+    />
     <script type="application/ld+json" set:html={JSON.stringify(orgJsonLd)} />
   </head>
   <body>
     <slot />
+    <WhatsAppFab />
+    <script>
+      // 滚动进场：容器标了 data-reveal 的，进入视口后给容器加 .is-visible，子元素按 CSS 级联出现。
+      // 减少动态效果时整段跳过（内容立即可见，不做进场）。
+      const prefersReduce =
+        window.matchMedia("(prefers-reduced-motion: reduce)").matches &&
+        !document.documentElement.classList.contains("force-motion");
+
+      if (!prefersReduce) {
+        const targets = Array.from(document.querySelectorAll("[data-reveal]"));
+        const revealAll = () => targets.forEach((el) => el.classList.add("is-visible"));
+
+        if (!("IntersectionObserver" in window)) {
+          revealAll();
+        } else {
+          let observerFired = false;
+          const observer = new IntersectionObserver(
+            (entries) => {
+              observerFired = true;
+              entries.forEach((entry) => {
+                if (entry.isIntersecting) {
+                  entry.target.classList.add("is-visible");
+                  observer.unobserve(entry.target);
+                }
+              });
+            },
+            { threshold: 0.12, rootMargin: "0px 0px -8% 0px" },
+          );
+
+          targets.forEach((el) => observer.observe(el));
+          // 兜底：只有观察器一次都没回调（说明它坏了）时才全部显示，绝不让内容留在隐藏状态
+          window.setTimeout(() => {
+            if (!observerFired) revealAll();
+          }, 2500);
+        }
+      }
+    </script>
   </body>
 </html>

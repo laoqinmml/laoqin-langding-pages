@@ -13,7 +13,7 @@ const { id, eyebrow, title, surface = false } = Astro.props;
   <div class="container">
     {
       title && (
-        <header class="section__head">
+        <header class="section__head" data-reveal>
           {eyebrow && <span class="eyebrow">{eyebrow}</span>}
           <h2>{title}</h2>
         </header>

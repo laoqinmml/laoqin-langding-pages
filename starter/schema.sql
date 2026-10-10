@@ -8,6 +8,7 @@ CREATE TABLE IF NOT EXISTS leads (
   email TEXT,
   company TEXT,
   country TEXT,
+  sport TEXT,
   message TEXT,
   page_url TEXT,
   utm_source TEXT,
@@ -15,6 +16,8 @@ CREATE TABLE IF NOT EXISTS leads (
   utm_campaign TEXT,
   gclid TEXT,
   fbclid TEXT,
+  attachment_name TEXT,
+  attachment_size INTEGER,
   mail_status TEXT,
   mail_error TEXT
 );

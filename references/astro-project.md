@@ -51,6 +51,33 @@ src/styles/global.css      基础排版与组件样式
 
 `tokens.css` 里三件事必须成套：**底色 + 一个强调色 + 中性灰阶**；字号用 `clamp()` 做流体缩放；容器宽度 `--container` 统一。换主题只改这一个文件。
 
+## 动效基线
+
+`starter` 自带一套极简动效，新项目不用从零写，也不要随手加更多：
+
+| 动效 | 触发 | 位置 |
+| --- | --- | --- |
+| 首屏载入级联 | 页面加载 | `global.css` 的 `rise-in` 动画作用在 `.hero > *`（纯 CSS，避免首屏闪烁） |
+| 区块滚动进场 | 容器进入视口 | 容器标 `data-reveal`；`Layout.astro` 的 IntersectionObserver 加 `.is-visible`；子元素按 `nth-child` 级联 60ms |
+| hover 反馈 | 悬停 | 卡片描边变亮 + 上浮 2px；按钮上浮 1px；ghost 反色（不用阴影） |
+
+四条硬规矩：
+
+1. **减少动态效果时立即显示**：`@media (prefers-reduced-motion: reduce)` 里把进场动画、位移、hover 位移全部关掉。进场动画属于「自动播放」，必须关；而随滚动而变的效果（sticky 段、进度线）属于交互反馈，照常开。
+2. **JS 失败不能让内容消失**：隐藏态只由 `<html class="js-reveal">` 触发，这个 class 由 head 内联脚本在首帧前加；`<noscript>` 里覆盖成可见；观察器 2.5 秒没任何回调就 `revealAll()` 兜底。
+3. **动效只出现在标记过的地方**：容器加 `data-reveal` 才有进场，不做「全站自动扫一遍」的魔法。
+4. **时长短**：160 / 320 / 620ms 三档 + 统一 `--ease-out`；超过这个量级的动效先问客户。
+
+无头截图默认报 `prefers-reduced-motion: reduce`，所以**截图里内容齐全，就等于验证了第 1 条**；要单独验证滚动进场，用 CDP 把媒体特性模拟成 `no-preference` 再测（滚动前子元素 `opacity: 0`，滚动后变 `1`）。
+
+**客户说"看不到动效"时的排查顺序**：① 控制台 `matchMedia("(prefers-reduced-motion: reduce)").matches`（`true` = 系统关了动画，Windows 在 设置 → 辅助功能 → 视觉效果 → 动画效果）；② 确认看的是动效版而不是克制版；③ 确认是刷新后看的首屏（载入动画只播一次）。演示/验收时可以在 URL 上加 `?motion=always` 临时无视系统设置（starter 已内置这个开关）。
+
+**验证滚动/数字动画时别只看最终值**：数字滚动如果只检查"最后等于 2013"，即使动画抛异常也会假通过。要**中途采样**（例如 160ms 一次），看到 `2013 → 772 → 1468 → …` 这种中间值才算真的在动。
+
+**选择器坑**：`js-reveal` 和 `force-motion` 都挂在同一个 `<html>` 上，覆盖规则必须写 `.force-motion.js-reveal [data-reveal]`（同一元素），写成 `.force-motion .js-reveal`（后代）永远不匹配，动效会被 reduce 的"立即可见"盖掉。
+
+想要更花的动效（React Bits / Vengeance UI / Animata 这类第三方动效库）时，先读 [third-party-motion.md](third-party-motion.md) 再决定走哪条路——它们都是 React 组件，真嵌进来等于给项目加 React 运行时（Vengeance UI 和 Animata 还要 Tailwind）。
+
 ## URL 与页面组织
 
 - 最终 URL 扁平：`/about-us/`、`/contact-us/`、`/products/`、`/blog/`、`/faq/`。
