@@ -1,0 +1,62 @@
+{
+  "base_url": "https://jojocode.com/v1/images/generations",
+  "model": "gpt-image-2",
+  "style_suffix": " Photorealistic, high detail, natural colour grading. No text, no watermark, no brand logos.",
+  "jobs": {
+    "sim-road": {
+      "prompt": "Wide landscape photograph at a cyclist's eye level: an alpine mountain road curving towards snow-capped peaks, a calm lake on the left reflecting bright sunlight with strong sparkling glare on the water, wet asphalt with a bright sheen, low morning sun in the upper right with visible glare, a lone road cyclist in the middle distance, crisp summer morning.",
+      "size": "1536x1024",
+      "max_w": 1800
+    },
+    "goggle-mirror-dark": {
+      "prompt": "Studio product photograph of a high-wrap prescription sports goggle with a single shield lens, matte black frame, iridescent mirror lens coating shifting from cobalt blue to violet to gold, three-quarter view, on a deep midnight navy background, dramatic rim lighting, glossy reflections on the lens, premium eyewear advertising.",
+      "size": "1536x1024",
+      "max_w": 1800
+    },
+    "goggle-pop": {
+      "prompt": "Studio product photograph of a wraparound sports goggle with a white frame and an orange mirror shield lens, viewed from the front slightly above, on a flat solid light sky-blue background, hard graphic shadow, clean minimal advertising style.",
+      "size": "1024x1024",
+      "max_w": 1200
+    },
+    "sport-cycling": {
+      "prompt": "Medium close-up of a road cyclist in a helmet wearing high-wrap sports goggles, riding on a mountain road, morning light, slight motion blur in the background, sharp focus on the face and goggles.",
+      "size": "1536x1024",
+      "max_w": 1600
+    },
+    "sport-running": {
+      "prompt": "Trail runner wearing lightweight wraparound sport sunglasses, running along a grassy mountain ridge trail at sunrise, athletic, dynamic, sharp focus on runner.",
+      "size": "1536x1024",
+      "max_w": 1600
+    },
+    "sport-ski": {
+      "prompt": "Skier wearing ski goggles with a mirror lens and a helmet, carving on a bright snowy slope, snow spray, blue sky, sunlight.",
+      "size": "1536x1024",
+      "max_w": 1600
+    },
+    "sport-outdoor": {
+      "prompt": "Mountaineer wearing wraparound sport goggles on a rocky high-altitude ridge, wind and fine dust, dramatic clouds, rugged terrain.",
+      "size": "1536x1024",
+      "max_w": 1600
+    },
+    "sport-water": {
+      "prompt": "Angler on a small boat wearing polarized wraparound sport sunglasses, holding a fishing rod, open sea with bright sunlight glare on the water, late afternoon.",
+      "size": "1536x1024",
+      "max_w": 1600
+    },
+    "sport-precision": {
+      "prompt": "Golfer wearing sleek wraparound sport sunglasses, crouching to read the green before a putt, golf course, soft daylight, shallow depth of field.",
+      "size": "1536x1024",
+      "max_w": 1600
+    },
+    "factory-lab": {
+      "prompt": "Modern optical prescription lens laboratory with automated freeform surfacing and edging machines in rows, clean white and blue interior, a technician in a lab coat inspecting a lens against the light, industrial precision.",
+      "size": "1536x1024",
+      "max_w": 1600
+    },
+    "coating": {
+      "prompt": "Close-up inside an industrial high-vacuum optical coating chamber: a domed rack holding dozens of lenses with iridescent blue-violet-gold reflections, metallic surfaces, dramatic light.",
+      "size": "1536x1024",
+      "max_w": 1600
+    }
+  }
+}

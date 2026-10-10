@@ -1,29 +1,29 @@
-"""Generate landing-page imagery via the OpenAI-compatible image API.
+#!/usr/bin/env python3
+"""生图并直接压缩入库。图片这步最后再跑。
 
-Usage: python -I gen_images.py <out_dir> [name ...]
-Key is read from the IMG_API_KEY environment variable.
+用法：
+  IMG_API_KEY=xxx python3 gen_images.py <输出目录> <jobs.json> [任务名 ...]
+  （不给任务名就全出；给了只出指定的，方便补单张）
+
+jobs.json 格式：
+{
+  "base_url": "https://example.com/v1/images/generations",
+  "model": "gpt-image-2",
+  "style_suffix": " Photorealistic, high detail, natural colour grading. No text, no watermark, no brand logos.",
+  "jobs": {
+    "hero":       {"prompt": "...", "size": "1536x1024", "max_w": 1800},
+    "product-01": {"prompt": "...", "size": "1024x1024", "max_w": 1200}
+  }
+}
+
+规矩：
+- 提示词里把比例写成数字（长宽比、各段长度），否则 AI 容易画歪；
+- key 只从环境变量读，绝不写进文件或产物；
+- 接口回包常被截断（IncompleteRead），脚本自带重试，兼容 b64_json 和 url 两种返回。
 """
 import base64, io, json, os, sys, time, urllib.request
 from concurrent.futures import ThreadPoolExecutor
 from PIL import Image
-
-BASE = "https://jojocode.com/v1/images/generations"
-KEY = os.environ["IMG_API_KEY"]
-TAIL = " Photorealistic, high detail, natural colour grading. No text, no watermark, no brand logos."
-
-JOBS = {
-    "sim-road": ("1536x1024", 1800, "Wide landscape photograph at a cyclist's eye level: an alpine mountain road curving towards snow-capped peaks, a calm lake on the left reflecting bright sunlight with strong sparkling glare on the water, wet asphalt with a bright sheen, low morning sun in the upper right with visible glare, a lone road cyclist in the middle distance, crisp summer morning."),
-    "goggle-mirror-dark": ("1536x1024", 1800, "Studio product photograph of a high-wrap prescription sports goggle with a single shield lens, matte black frame, iridescent mirror lens coating shifting from cobalt blue to violet to gold, three-quarter view, on a deep midnight navy background, dramatic rim lighting, glossy reflections on the lens, premium eyewear advertising."),
-    "goggle-pop": ("1024x1024", 1200, "Studio product photograph of a wraparound sports goggle with a white frame and an orange mirror shield lens, viewed from the front slightly above, on a flat solid light sky-blue background, hard graphic shadow, clean minimal advertising style."),
-    "sport-cycling": ("1536x1024", 1600, "Medium close-up of a road cyclist in a helmet wearing high-wrap sports goggles, riding on a mountain road, morning light, slight motion blur in the background, sharp focus on the face and goggles."),
-    "sport-running": ("1536x1024", 1600, "Trail runner wearing lightweight wraparound sport sunglasses, running along a grassy mountain ridge trail at sunrise, athletic, dynamic, sharp focus on runner."),
-    "sport-ski": ("1536x1024", 1600, "Skier wearing ski goggles with a mirror lens and a helmet, carving on a bright snowy slope, snow spray, blue sky, sunlight."),
-    "sport-outdoor": ("1536x1024", 1600, "Mountaineer wearing wraparound sport goggles on a rocky high-altitude ridge, wind and fine dust, dramatic clouds, rugged terrain."),
-    "sport-water": ("1536x1024", 1600, "Angler on a small boat wearing polarized wraparound sport sunglasses, holding a fishing rod, open sea with bright sunlight glare on the water, late afternoon."),
-    "sport-precision": ("1536x1024", 1600, "Golfer wearing sleek wraparound sport sunglasses, crouching to read the green before a putt, golf course, soft daylight, shallow depth of field."),
-    "factory-lab": ("1536x1024", 1600, "Modern optical prescription lens laboratory with automated freeform surfacing and edging machines in rows, clean white and blue interior, a technician in a lab coat inspecting a lens against the light, industrial precision."),
-    "coating": ("1536x1024", 1600, "Close-up inside an industrial high-vacuum optical coating chamber: a domed rack holding dozens of lenses with iridescent blue-violet-gold reflections, metallic surfaces, dramatic light."),
-}
 
 
 def fetch(url):
@@ -32,45 +32,57 @@ def fetch(url):
             with urllib.request.urlopen(urllib.request.Request(url, headers={"User-Agent": "Mozilla/5.0"}), timeout=120) as r:
                 return r.read()
         except Exception as e:
-            print(f"  download retry {attempt + 1}: {e}", flush=True)
+            print(f"  下载重试 {attempt + 1}: {e}", flush=True)
             time.sleep(3)
-    raise RuntimeError("download failed")
+    raise RuntimeError("下载失败")
 
 
-def gen(name, out_dir):
-    size, max_w, prompt = JOBS[name]
-    body = json.dumps({"model": "gpt-image-2", "prompt": prompt + TAIL, "size": size, "n": 1, "response_format": "url"}).encode()
-    req = urllib.request.Request(BASE, data=body, headers={"Authorization": f"Bearer {KEY}", "Content-Type": "application/json"})
+def gen(cfg, key, name, spec, out_dir):
+    body = json.dumps({
+        "model": cfg.get("model", "gpt-image-2"),
+        "prompt": spec["prompt"] + cfg.get("style_suffix", ""),
+        "size": spec.get("size", "1536x1024"),
+        "n": 1,
+        "response_format": "url",
+    }).encode()
+    req = urllib.request.Request(cfg["base_url"], data=body,
+                                 headers={"Authorization": f"Bearer {key}", "Content-Type": "application/json"})
     for attempt in range(4):
         try:
             with urllib.request.urlopen(req, timeout=400) as r:
-                raw = r.read()
-            item = json.loads(raw)["data"][0]
-            if "b64_json" in item:
-                blob = base64.b64decode(item["b64_json"])
-            else:
-                blob = fetch(item["url"])
+                item = json.loads(r.read())["data"][0]
+            blob = base64.b64decode(item["b64_json"]) if "b64_json" in item else fetch(item["url"])
             break
         except Exception as e:
-            print(f"{name}: attempt {attempt + 1} error {e}", flush=True)
+            print(f"{name}: 第 {attempt + 1} 次失败 {e}", flush=True)
         time.sleep(5 + attempt * 10)
     else:
-        raise RuntimeError("gave up")
+        raise RuntimeError("放弃")
+
     img = Image.open(io.BytesIO(blob)).convert("RGB")
+    max_w = spec.get("max_w", 1800)
     if img.width > max_w:
         img = img.resize((max_w, round(img.height * max_w / img.width)), Image.LANCZOS)
     path = os.path.join(out_dir, name + ".jpg")
     img.save(path, "JPEG", quality=82, optimize=True, progressive=True)
-    return f"{name}: {img.width}x{img.height} {os.path.getsize(path)//1024}KB"
+    return f"{name}: {img.width}x{img.height} {os.path.getsize(path) // 1024}KB"
 
 
 if __name__ == "__main__":
-    out = sys.argv[1]
-    names = sys.argv[2:] or list(JOBS)
-    with ThreadPoolExecutor(max_workers=2) as ex:
-        futs = {ex.submit(gen, n, out): n for n in names}
+    if len(sys.argv) < 3:
+        sys.exit(__doc__)
+    key = os.environ.get("IMG_API_KEY")
+    if not key:
+        sys.exit("先设 IMG_API_KEY 环境变量（不要把 key 写进文件）。")
+    out_dir, jobs_file, *only = sys.argv[1:]
+    cfg = json.load(open(jobs_file, encoding="utf-8"))
+    jobs = cfg["jobs"]
+    names = only or list(jobs)
+    os.makedirs(out_dir, exist_ok=True)
+    with ThreadPoolExecutor(max_workers=2) as ex:  # 并发别超过 2–3，高了容易整批截断
+        futs = {ex.submit(gen, cfg, key, n, jobs[n], out_dir): n for n in names}
         for f, n in futs.items():
             try:
                 print(f.result(), flush=True)
             except Exception as e:
-                print(f"{n}: FAILED {e}", flush=True)
+                print(f"{n}: 失败 {e}", flush=True)
