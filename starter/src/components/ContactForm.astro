@@ -1,0 +1,151 @@
+---
+import { config } from "../config";
+import { content } from "../content";
+
+const t = content.form;
+const contact = config.contact;
+const turnstileSiteKey = import.meta.env.PUBLIC_TURNSTILE_SITE_KEY ?? "";
+const useTurnstile = config.features.turnstile && Boolean(turnstileSiteKey);
+const whatsappUrl = contact.whatsapp
+  ? `https://wa.me/${contact.whatsapp.replace(/[^0-9]/g, "")}`
+  : "";
+---
+
+<section id="contact" class="section section--surface">
+  <div class="container contact-layout">
+    <div>
+      <h2>{t.title}</h2>
+      <p>{t.body}</p>
+      <ul>
+        <li>
+          Email: <a href={`mailto:${contact.email}`}>{contact.email}</a>
+        </li>
+        {whatsappUrl && <li><a href={whatsappUrl} rel="noopener">WhatsApp</a></li>}
+        {contact.phone && <li><a href={`tel:${contact.phone}`}>{contact.phone}</a></li>}
+        {contact.address && <li>{contact.address}</li>}
+      </ul>
+    </div>
+
+    <form
+      id="enquiry-form"
+      class="form"
+      data-webmcp-form="lead-capture"
+      aria-label={t.ariaLabel}
+      method="post"
+      action={config.form.endpoint}
+      novalidate
+    >
+      <div class="field">
+        <label for="f-name">{t.fields.name}</label>
+        <input id="f-name" name="name" type="text" autocomplete="name" required />
+      </div>
+      <div class="field">
+        <label for="f-email">{t.fields.email}</label>
+        <input id="f-email" name="email" type="email" autocomplete="email" required />
+      </div>
+      <div class="field">
+        <label for="f-company">{t.fields.company}</label>
+        <input id="f-company" name="company" type="text" autocomplete="organization" />
+      </div>
+      <div class="field">
+        <label for="f-country">{t.fields.country}</label>
+        <input id="f-country" name="country" type="text" autocomplete="country-name" />
+      </div>
+      <div class="field">
+        <label for="f-message">{t.fields.message}</label>
+        <textarea id="f-message" name="message" placeholder={t.messagePlaceholder} required></textarea>
+      </div>
+
+      <div class="honeypot" aria-hidden="true">
+        <label for="f-website">Website</label>
+        <input id="f-website" name="website" type="text" tabindex="-1" autocomplete="off" />
+      </div>
+
+      {
+        useTurnstile && (
+          <>
+            <div class="cf-turnstile" data-sitekey={turnstileSiteKey} />
+            <script
+              src="https://challenges.cloudflare.com/turnstile/v0/api.js"
+              async
+              defer
+              is:inline
+            />
+          </>
+        )
+      }
+
+      <button class="btn" type="submit">{t.submit}</button>
+      <p class="form__note">{config.form.privacyNote}</p>
+      <p id="form-status" class="form__status" role="status" aria-live="polite"></p>
+    </form>
+  </div>
+</section>
+
+<script
+  define:vars={{
+    endpoint: config.form.endpoint,
+    thanksPath: config.form.thanksPath,
+    messages: { sending: t.sending, success: t.success, error: t.error },
+  }}
+>
+  const form = document.getElementById("enquiry-form");
+  const statusEl = document.getElementById("form-status");
+
+  function setStatus(state, text) {
+    if (!statusEl) return;
+    statusEl.dataset.state = state;
+    statusEl.textContent = text;
+  }
+
+  if (form instanceof HTMLFormElement) {
+    form.addEventListener("submit", async (event) => {
+      event.preventDefault();
+      const data = new FormData(form);
+      const params = new URLSearchParams(window.location.search);
+      const submitBtn = form.querySelector('button[type="submit"]');
+
+      const payload = {
+        name: String(data.get("name") || "").trim(),
+        email: String(data.get("email") || "").trim(),
+        company: String(data.get("company") || "").trim(),
+        country: String(data.get("country") || "").trim(),
+        message: String(data.get("message") || "").trim(),
+        website: String(data.get("website") || ""),
+        turnstileToken: String(data.get("cf-turnstile-response") || ""),
+        submission_key:
+          window.crypto && window.crypto.randomUUID
+            ? window.crypto.randomUUID()
+            : `${Date.now()}-${Math.random().toString(16).slice(2)}`,
+        page_url: window.location.href,
+        utm_source: params.get("utm_source") || "",
+        utm_medium: params.get("utm_medium") || "",
+        utm_campaign: params.get("utm_campaign") || "",
+        gclid: params.get("gclid") || "",
+        fbclid: params.get("fbclid") || "",
+      };
+
+      setStatus("pending", messages.sending);
+      if (submitBtn) submitBtn.disabled = true;
+
+      try {
+        const response = await fetch(endpoint, {
+          method: "POST",
+          headers: { "content-type": "application/json" },
+          body: JSON.stringify(payload),
+        });
+        const result = await response.json().catch(() => ({}));
+        if (!response.ok || !result.ok) throw new Error(result.error || "request failed");
+
+        setStatus("success", messages.success);
+        form.reset();
+        if (window.turnstile) window.turnstile.reset();
+        if (thanksPath) window.location.assign(thanksPath);
+      } catch (error) {
+        setStatus("error", messages.error);
+      } finally {
+        if (submitBtn) submitBtn.disabled = false;
+      }
+    });
+  }
+</script>

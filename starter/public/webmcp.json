@@ -1,0 +1,47 @@
+{
+  "name": "b2b-landing-page",
+  "version": "1.0.0",
+  "description": "Machine-readable description of this site's enquiry form, for AI agents and browser automation.",
+  "forms": [
+    {
+      "id": "enquiry-form",
+      "name": "lead-capture",
+      "description": "Request a quotation for custom parts or services.",
+      "endpoint": "/api/contact",
+      "method": "POST",
+      "contentType": "application/json",
+      "fields": [
+        { "name": "name", "type": "string", "required": true, "description": "Full name of the sender" },
+        { "name": "email", "type": "string", "format": "email", "required": true, "description": "Work email address" },
+        { "name": "company", "type": "string", "required": false },
+        { "name": "country", "type": "string", "required": false },
+        { "name": "message", "type": "string", "required": true, "description": "Part name, material, quantity, target price, drawing or specification" }
+      ],
+      "result": {
+        "type": "object",
+        "properties": {
+          "ok": { "type": "boolean" },
+          "stored": { "type": "boolean" },
+          "mailed": { "type": "boolean" }
+        }
+      }
+    }
+  ],
+  "tools": [
+    {
+      "name": "submit_quotation_request",
+      "description": "Submit a quotation request on behalf of the site visitor.",
+      "inputSchema": {
+        "type": "object",
+        "required": ["name", "email", "message"],
+        "properties": {
+          "name": { "type": "string" },
+          "email": { "type": "string", "format": "email" },
+          "company": { "type": "string" },
+          "country": { "type": "string" },
+          "message": { "type": "string" }
+        }
+      }
+    }
+  ]
+}

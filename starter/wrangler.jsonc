@@ -1,0 +1,17 @@
+{
+  "$schema": "node_modules/wrangler/config-schema.json",
+  "name": "b2b-landing-page",
+  "compatibility_date": "2026-10-01",
+  "pages_build_output_dir": "dist"
+
+  // 要让询盘落库，先建库再把下面这段打开：
+  //   npx wrangler d1 create landing-leads
+  // 把输出的 database_id 填进来，并把 src/config.ts 的 features.d1 改成 true。
+  // ,"d1_databases": [
+  //   {
+  //     "binding": "DB",
+  //     "database_name": "landing-leads",
+  //     "database_id": "REPLACE_WITH_DATABASE_ID"
+  //   }
+  // ]
+}

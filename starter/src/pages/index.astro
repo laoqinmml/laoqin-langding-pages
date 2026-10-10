@@ -1,0 +1,173 @@
+---
+import Layout from "../layouts/Layout.astro";
+import Header from "../components/Header.astro";
+import Hero from "../components/Hero.astro";
+import Section from "../components/Section.astro";
+import ContactForm from "../components/ContactForm.astro";
+import Footer from "../components/Footer.astro";
+import { content } from "../content";
+
+const faqJsonLd = {
+  "@context": "https://schema.org",
+  "@type": "FAQPage",
+  mainEntity: content.faq.items.map((item) => ({
+    "@type": "Question",
+    name: item.q,
+    acceptedAnswer: { "@type": "Answer", text: item.a },
+  })),
+};
+---
+
+<Layout>
+  <Header />
+  <main>
+    <Hero />
+
+    {
+      content.trust.length > 0 && (
+        <div class="container">
+          <div class="trust">
+            {content.trust.map((item) => (
+              <div class="stat">
+                <span class="stat__value">{item.value}</span>
+                <span class="stat__label">{item.label}</span>
+              </div>
+            ))}
+          </div>
+        </div>
+      )
+    }
+
+    <Section eyebrow={content.benefits.eyebrow} title={content.benefits.title} surface>
+      <div class="grid">
+        {
+          content.benefits.items.map((item) => (
+            <article class="card">
+              <h3>{item.title}</h3>
+              <p>{item.body}</p>
+              <p class="card__fact">{item.fact}</p>
+            </article>
+          ))
+        }
+      </div>
+    </Section>
+
+    <Section
+      id="products"
+      eyebrow={content.products.eyebrow}
+      title={content.products.title}
+    >
+      <div class="grid">
+        {
+          content.products.items.map((item) => (
+            <article class="card">
+              <img
+                class="card__media"
+                src={item.image}
+                alt={item.name}
+                width="800"
+                height="600"
+                loading="lazy"
+              />
+              <h3>{item.name}</h3>
+              <p>{item.use}</p>
+              <p class="card__fact">{item.spec}</p>
+            </article>
+          ))
+        }
+      </div>
+    </Section>
+
+    <Section
+      id="applications"
+      eyebrow={content.applications.eyebrow}
+      title={content.applications.title}
+      surface
+    >
+      <div class="grid">
+        {
+          content.applications.items.map((item) => (
+            <div class="card">
+              <h3>{item.name}</h3>
+              <p>{item.detail}</p>
+            </div>
+          ))
+        }
+      </div>
+    </Section>
+
+    <Section
+      id="capabilities"
+      eyebrow={content.capabilities.eyebrow}
+      title={content.capabilities.title}
+    >
+      <div class="grid">
+        {
+          content.capabilities.items.map((item) => (
+            <div class="stat card">
+              <span class="stat__value">{item.value}</span>
+              <span class="stat__label">{item.label}</span>
+            </div>
+          ))
+        }
+      </div>
+      <p>{content.capabilities.note}</p>
+    </Section>
+
+    <Section
+      id="process"
+      eyebrow={content.process.eyebrow}
+      title={content.process.title}
+      surface
+    >
+      <div class="grid">
+        {
+          content.process.modes.map((mode) => (
+            <div class="card">
+              <h3>{mode.name}</h3>
+              <p>{mode.body}</p>
+            </div>
+          ))
+        }
+      </div>
+      <div class="steps" style="margin-top: var(--space-5)">
+        {
+          content.process.steps.map((item) => (
+            <div class="card">
+              <span class="eyebrow">Step {item.step}</span>
+              <h3>{item.title}</h3>
+              <p>{item.body}</p>
+            </div>
+          ))
+        }
+      </div>
+    </Section>
+
+    <Section
+      eyebrow={content.certifications.eyebrow}
+      title={content.certifications.title}
+    >
+      <ul>
+        {content.certifications.items.map((item) => <li>{item}</li>)}
+      </ul>
+    </Section>
+
+    <Section id="faq" eyebrow={content.faq.eyebrow} title={content.faq.title} surface>
+      <div class="grid">
+        {
+          content.faq.items.map((item) => (
+            <article class="card">
+              <h3>{item.q}</h3>
+              <p>{item.a}</p>
+            </article>
+          ))
+        }
+      </div>
+    </Section>
+
+    <ContactForm />
+  </main>
+  <Footer />
+
+  <script type="application/ld+json" set:html={JSON.stringify(faqJsonLd)} />
+</Layout>

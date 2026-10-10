@@ -1,0 +1,23 @@
+---
+import Layout from "../layouts/Layout.astro";
+import Header from "../components/Header.astro";
+import Footer from "../components/Footer.astro";
+import { config } from "../config";
+import { content } from "../content";
+---
+
+{/* 成功页始终 noindex，不参与搜索 */}
+<Layout
+  title={`Thank you — ${config.brand.name}`}
+  description={content.thanks.body}
+  noindex={true}
+>
+  <Header />
+  <main class="section container">
+    <h1>{content.thanks.title}</h1>
+    <p class="lead">{content.thanks.body}</p>
+    <p><a class="btn" href="/">{content.thanks.backLabel}</a></p>
+    <p><a href={`mailto:${config.contact.email}`}>{config.contact.email}</a></p>
+  </main>
+  <Footer />
+</Layout>

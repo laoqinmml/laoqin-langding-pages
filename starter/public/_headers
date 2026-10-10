@@ -1,0 +1,3 @@
+# 预览锁第三层：预售期锁索引，上线时删掉这一段（同时把 config.ts 的 noindex 改成 false）
+/*
+  X-Robots-Tag: noindex, nofollow

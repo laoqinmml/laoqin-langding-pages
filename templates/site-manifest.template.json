@@ -1,0 +1,65 @@
+{
+  "projectName": "example-site",
+  "audience": ["中国外贸老板", "SEO 新手", "独立站运营"],
+  "siteInfo": {
+    "companyName": "",
+    "brandName": "",
+    "targetCountry": "",
+    "targetLanguage": "",
+    "industry": "",
+    "businessType": "",
+    "logo": "",
+    "primaryColor": "",
+    "referenceSite": "",
+    "contactEmail": "",
+    "formRecipientEmail": "",
+    "contactMethods": [],
+    "socialLinks": [],
+    "domain": "",
+    "cloudflareStatus": "unknown"
+  },
+  "features": {
+    "home": true,
+    "blog": false,
+    "blogCategory": false,
+    "products": false,
+    "productCategory": false,
+    "cases": false,
+    "faq": false,
+    "downloads": false
+  },
+  "dependencyRules": [
+    "home is always true",
+    "if blog is true, blogCategory must be true",
+    "if products is true, productCategory must be true"
+  ],
+  "urlRules": {
+    "flatFinalUrls": true,
+    "allowedSlugPattern": "^[a-z0-9-]+$",
+    "avoidDeepPaths": true
+  },
+  "seoRules": {
+    "uniqueTitle": true,
+    "reasonableTitleLength": true,
+    "uniqueMetaDescription": true,
+    "reasonableDescriptionLength": true,
+    "oneUniqueH1PerPage": true,
+    "canonicalMatchesCurrentUrl": true,
+    "orphanPageDetection": true,
+    "imageAltTitleSuggestions": true,
+    "robotsTxt": true,
+    "sitemapXml": true,
+    "localized404": true,
+    "llmsTxt": true,
+    "webmcpJson": true,
+    "accessibilityTree": true,
+    "webmcpFormAnnotations": true,
+    "lowCumulativeLayoutShift": true
+  },
+  "deployment": {
+    "platform": "Cloudflare Pages",
+    "localAuth": "npx wrangler login",
+    "buildCommand": "npm run build",
+    "deployCommand": "npx wrangler pages deploy dist --project-name PROJECT_NAME"
+  }
+}

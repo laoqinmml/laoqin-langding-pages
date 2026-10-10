@@ -1,0 +1,30 @@
+---
+import { config } from "../config";
+import { content } from "../content";
+
+const contact = config.contact;
+---
+
+<footer class="site-footer">
+  <div class="container">
+    <p><strong>{config.brand.name}</strong></p>
+    <p>{content.footer.note}</p>
+    <p>
+      <a href={`mailto:${contact.email}`}>{contact.email}</a>
+      {contact.phone && <span> · {contact.phone}</span>}
+      {contact.address && <span> · {contact.address}</span>}
+    </p>
+    {
+      contact.socials.length > 0 && (
+        <p>
+          {contact.socials.map((social) => (
+            <a href={social.url} rel="noopener">
+              {social.label}
+            </a>
+          ))}
+        </p>
+      )
+    }
+    <p>{content.footer.copyright}</p>
+  </div>
+</footer>

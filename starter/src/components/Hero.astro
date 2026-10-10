@@ -1,0 +1,41 @@
+---
+import { config } from "../config";
+import { content } from "../content";
+
+const { hero } = content;
+const whatsappUrl = config.contact.whatsapp
+  ? `https://wa.me/${config.contact.whatsapp.replace(/[^0-9]/g, "")}`
+  : "";
+---
+
+<section class="hero container">
+  <div>
+    <span class="eyebrow">{hero.eyebrow}</span>
+    <h1>{hero.title}</h1>
+    <p class="lead">{hero.lead}</p>
+    <div class="cta-row">
+      <a class="btn" href={hero.primaryCta.href}>{hero.primaryCta.label}</a>
+      <a class="btn btn--ghost" href={hero.secondaryCta.href}>{hero.secondaryCta.label}</a>
+      {
+        whatsappUrl && (
+          <a class="btn btn--ghost" href={whatsappUrl} rel="noopener">
+            WhatsApp
+          </a>
+        )
+      }
+    </div>
+  </div>
+  <div>
+    {
+      hero.image ? (
+        <img src={hero.image} alt={hero.imageAlt} width="1200" height="900" loading="eager" />
+      ) : (
+        <div class="placeholder" role="img" aria-label={hero.imageAlt}>
+          产品/工厂照片放这里
+          <br />
+          public/images/…
+        </div>
+      )
+    }
+  </div>
+</section>

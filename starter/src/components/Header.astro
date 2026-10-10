@@ -1,0 +1,14 @@
+---
+import { config } from "../config";
+import { content } from "../content";
+---
+
+<header class="site-header">
+  <div class="container site-header__inner">
+    <a class="brand" href="/">{config.brand.logoText}</a>
+    <nav class="site-nav" aria-label="Main navigation">
+      {content.nav.map((item) => <a href={item.href}>{item.label}</a>)}
+    </nav>
+    <a class="btn" href={content.navCta.href}>{content.navCta.label}</a>
+  </div>
+</header>

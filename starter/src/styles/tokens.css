@@ -1,0 +1,49 @@
+/*
+ * 设计令牌：改主题只改这里。组件只认下面这十几个语义变量（--c-* / --step-* / --space-* / --radius*）。
+ *
+ * 换肤两种方式：
+ *   1. 手改：直接改下面的值。一个底色 + 一个强调色，其余中性。
+ *   2. 用风格模板：客户从 https://styles.refero.design/ 下载的 DESIGN.md 里自带一段
+ *      `:root { --color-* / --text-* / --spacing-* / --radius-* / --surface-* }`，
+ *      整段贴进来，再把下面的语义变量指过去即可（映射表见技能里的 references/design-md.md）。
+ *
+ * 映射示例：
+ *   --c-bg: var(--surface-canvas-white);
+ *   --c-ink: var(--color-carbony-black);
+ *   --c-accent: var(--color-giallo-vivo);
+ *   --font-sans: var(--font-lambotype);
+ *   --radius: var(--radius-buttons);
+ */
+:root {
+  --c-bg: #f5f6f4;
+  --c-surface: #ffffff;
+  --c-ink: #12181d;
+  --c-ink-soft: #4d5a63;
+  --c-line: #dfe3e0;
+  --c-accent: #1f5f4a;
+  --c-accent-soft: #e6efe9;
+  --c-on-accent: #ffffff;
+
+  --font-sans: "Inter", system-ui, -apple-system, "Segoe UI", Roboto,
+    "Helvetica Neue", Arial, sans-serif;
+  --font-mono: ui-monospace, "SFMono-Regular", "JetBrains Mono", Menlo, monospace;
+
+  --step--1: clamp(0.85rem, 0.83rem + 0.1vw, 0.94rem);
+  --step-0: clamp(1rem, 0.96rem + 0.2vw, 1.08rem);
+  --step-1: clamp(1.18rem, 1.11rem + 0.35vw, 1.36rem);
+  --step-2: clamp(1.45rem, 1.32rem + 0.7vw, 1.9rem);
+  --step-3: clamp(1.85rem, 1.6rem + 1.2vw, 2.6rem);
+  --step-4: clamp(2.2rem, 1.75rem + 2.2vw, 3.4rem);
+
+  --space-1: 0.5rem;
+  --space-2: 0.75rem;
+  --space-3: 1rem;
+  --space-4: 1.5rem;
+  --space-5: 2.25rem;
+  --space-6: 3.5rem;
+
+  --radius: 6px;
+  --radius-lg: 10px;
+  --container: 1120px;
+  --shadow: 0 18px 40px -28px rgba(18, 24, 29, 0.35);
+}

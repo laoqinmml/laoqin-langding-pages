@@ -1,0 +1,9 @@
+# 本地开发用的运行时密钥，不要提交到仓库
+# 生产环境用：npx wrangler pages secret put <KEY> --project-name <project>
+#
+# Turnstile：先在 Cloudflare 控制台建站点，拿到 site key 与 secret key
+TURNSTILE_SECRET_KEY=
+# Resend：发信 API key、收件邮箱、发件人（发件域名要先在 Resend 验证）
+RESEND_API_KEY=
+NOTIFY_EMAIL=
+FROM_EMAIL=
