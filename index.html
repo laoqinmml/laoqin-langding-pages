@@ -1,0 +1,42 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>TaiWoo landing page: three directions</title>
+<style>
+  body { margin: 0; font: 17px/1.5 system-ui, "Segoe UI", sans-serif; background: #f4f4f2; color: #14181f; }
+  main { max-width: 1100px; margin: 0 auto; padding: 56px 24px; }
+  h1 { font-size: 34px; margin: 0 0 8px; letter-spacing: -0.02em; }
+  p.sub { color: #566; margin: 0 0 36px; }
+  .grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 20px; }
+  a.card { display: block; text-decoration: none; color: inherit; background: #fff; border: 1px solid #dcdcd6; border-radius: 10px; overflow: hidden; transition: transform .2s, box-shadow .2s; }
+  a.card:hover { transform: translateY(-3px); box-shadow: 0 14px 30px -16px rgba(0,0,0,.35); }
+  .sw { height: 150px; }
+  .body { padding: 18px 20px 22px; }
+  h2 { margin: 0 0 6px; font-size: 21px; }
+  .body p { margin: 0; font-size: 15px; color: #566; }
+  @media (max-width: 800px) { .grid { grid-template-columns: 1fr; } }
+</style>
+</head>
+<body>
+<main>
+  <h1>TaiWoo prescription sports goggles</h1>
+  <p class="sub">Three landing page directions, same facts, different design systems.</p>
+  <div class="grid">
+    <a class="card" href="v1-lens-lab/">
+      <div class="sw" style="background:linear-gradient(120deg,#F2F5F7 0 50%,#1F45D6 50% 70%,#B9762A 70% 85%,#C8475E 85%)"></div>
+      <div class="body"><h2>V1 Lens Lab</h2><p>Light optical lab. Move a goggle lens over a real scene and switch lens types live.</p></div>
+    </a>
+    <a class="card" href="v2-mirror-night/">
+      <div class="sw" style="background:linear-gradient(100deg,#0B1A33 0 20%,#4D7CFF,#9B5CFF,#FF6FB1,#FFB547,#49E3C1)"></div>
+      <div class="body"><h2>V2 Mirror Night</h2><p>Dark cobalt. A WebGL mirror-coated lens, full-bleed sport photography, a 3D lens stack.</p></div>
+    </a>
+    <a class="card" href="v3-pictogram/">
+      <div class="sw" style="background:linear-gradient(90deg,#1D5FB0 0 17%,#F07D1A 17% 34%,#2F86C6 34% 50%,#2E9B57 50% 67%,#138A8A 67% 83%,#13294B 83%)"></div>
+      <div class="body"><h2>V3 Pictogram</h2><p>Games-style signage. Flat colour, sport pictograms, and a brief builder that fills the enquiry form.</p></div>
+    </a>
+  </div>
+</main>
+</body>
+</html>

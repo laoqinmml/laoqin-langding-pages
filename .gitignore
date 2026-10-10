@@ -1,0 +1,15 @@
+# 依赖
+node_modules/
+__pycache__/
+*.pyc
+
+# 截图和测试产物
+_tools/shots/
+_tools/test.json
+_tools/*.png
+_tools/contact.jpg
+_tools/storyboard.jpg
+
+# 系统
+.DS_Store
+Thumbs.db
