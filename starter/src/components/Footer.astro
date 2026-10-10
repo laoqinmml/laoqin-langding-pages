@@ -9,11 +9,17 @@ const contact = config.contact;
   <div class="container">
     <p><strong>{config.brand.name}</strong></p>
     <p>{content.footer.note}</p>
-    <p>
-      <a href={`mailto:${contact.email}`}>{contact.email}</a>
-      {contact.phone && <span> · {contact.phone}</span>}
-      {contact.address && <span> · {contact.address}</span>}
-    </p>
+    {
+      (contact.email || contact.phone || contact.address) && (
+        <p>
+          {contact.email && <a href={`mailto:${contact.email}`}>{contact.email}</a>}
+          {contact.email && contact.phone && <span> · </span>}
+          {contact.phone && <span>{contact.phone}</span>}
+          {(contact.email || contact.phone) && contact.address && <span> · </span>}
+          {contact.address && <span>{contact.address}</span>}
+        </p>
+      )
+    }
     {
       contact.socials.length > 0 && (
         <p>

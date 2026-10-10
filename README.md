@@ -11,7 +11,7 @@
 | 路径 | 什么时候用 | 交付物 |
 | --- | --- | --- |
 | 主线：Astro 落地页 → Cloudflare | 客户要一个能收询盘的正式站 | Astro 静态站 + 询盘表单 + 上线 |
-| A 用 DESIGN.md 定风格 | 客户有喜欢的网站风格 | 按那份设计系统出草稿 |
+| A 按客户给的风格做 | 客户发来 `DESIGN.md`，或直接甩一张喜欢的网站截图 | 按那份设计系统 / 截图的结构与气质出草稿 |
 | B 多方案比稿 | 客户拿不定设计方向 | 2–3 版互不相似的设计，选定后再进 Astro |
 | C 多页 / SEO 内容站 | 要产品页、博客、案例、FAQ | 多页 Astro 站 + 内容工作流 |
 
@@ -68,6 +68,7 @@ npm run build      # 产物在 dist/
 | `references/landing-page-structure.md` | B2B 落地页怎么组织：按类型选结构、区块顺序、CTA 与表单策略、失败模式 |
 | `references/design-directions.md` | 多方案设计：方向从主题怎么长出来、三轴不重叠、AI 默认味、截图自审与出图 |
 | `references/design-md.md` | 用 [styles.refero.design](https://styles.refero.design/) 的 `DESIGN.md` 定风格：结构解读、映射进 `tokens.css`、Do/Don't 转自检项 |
+| `references/screenshot-to-code.md` | 客户发来喜欢的网站截图：要什么样的截图、提取骨架/令牌、两条执行路径（含 [abi/screenshot-to-code](https://github.com/abi/screenshot-to-code)）、版权边界与并排自审 |
 | `references/images.md` | 图片两阶段：`placehold.co` 语法与尺寸表、换真图、生图 API 的 jobs JSON |
 | `references/astro-project.md` | Astro 工程：目录、组件规矩、多页扩展与依赖规则、SEO/可访问性清单 |
 | `references/deploy-cloudflare.md` | 部署：命令、密钥三类、D1/Turnstile/Resend、noindex 锁、域名、线上验证 |
@@ -83,11 +84,14 @@ npm run build      # 产物在 dist/
 
 细节见 [references/images.md](references/images.md)。
 
-## 换风格：DESIGN.md
+## 换风格：DESIGN.md 或参考截图
 
-客户可以去 [styles.refero.design](https://styles.refero.design/) 挑一个喜欢的网站风格，下载 `DESIGN.md` 交给 agent。它有现成的 `:root {}` 变量块、组件规格和 Do's and Don'ts，映射进 `starter/src/styles/tokens.css` 即可整站换风格。做法见 [references/design-md.md](references/design-md.md)。
+两条输入，任选其一：
 
-注意：借的是结构与排版，不搬别人的 Logo、字体文件和实拍图；强调色优先换回客户自己的品牌色。
+- **DESIGN.md**：客户去 [styles.refero.design](https://styles.refero.design/) 挑一个喜欢的网站风格，下载 `DESIGN.md` 交给 agent。它有现成的 `:root {}` 变量块、组件规格和 Do's and Don'ts，映射进 `starter/src/styles/tokens.css` 即可整站换风格。
+- **网站截图**：客户直接发"我想要这种"的截图（整页、桌面 + 手机各一张）。先提取骨架、栅格、留白节奏、配色、字体气质，再落到 starter；需要快速看清结构时可用 [abi/screenshot-to-code](https://github.com/abi/screenshot-to-code) 生成 HTML 参考稿——它输出的是 HTML/React 单页，**不是交付物**（没有 SEO 文件、询盘落库和 Cloudflare 链路）。
+
+做法见 [references/design-md.md](references/design-md.md) 与 [references/screenshot-to-code.md](references/screenshot-to-code.md)。共同红线：借结构与风格，不搬别人的 Logo、图片、字体文件和文案，不做 1:1 复刻；强调色优先换回客户自己的品牌色；截图里的参数和认证数字仍然只能用客户提供的事实。
 
 ## 部署到 Cloudflare Pages
 

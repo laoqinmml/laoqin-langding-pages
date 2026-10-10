@@ -17,7 +17,13 @@ import { content } from "../content";
     <h1>{content.thanks.title}</h1>
     <p class="lead">{content.thanks.body}</p>
     <p><a class="btn" href="/">{content.thanks.backLabel}</a></p>
-    <p><a href={`mailto:${config.contact.email}`}>{config.contact.email}</a></p>
+    {
+      config.contact.email && (
+        <p>
+          <a href={`mailto:${config.contact.email}`}>{config.contact.email}</a>
+        </p>
+      )
+    }
   </main>
   <Footer />
 </Layout>

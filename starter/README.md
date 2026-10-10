@@ -54,9 +54,11 @@ https://placehold.co/800x600/d8ded9/3c4a45/jpeg?text=CNC+parts
 
 客户确认后换成真图：实拍图放进 `public/images/` 并把 `content.ts` 里的 URL 改成 `/images/xxx.jpg`；需要 AI 出图就用生图脚本（见技能里的 `references/images.md`）。**占位图是外链，上线前必须全部换掉**，换完重新 `npm run build` 并重跑一遍手机端检查。
 
-## 换风格：让用户挑一份 DESIGN.md
+## 换风格：DESIGN.md 或参考截图
 
-如果客户不想看比稿，让他去 [styles.refero.design](https://styles.refero.design/) 挑一个喜欢的风格，下载 `DESIGN.md` 发过来。做法：
+如果客户不想看比稿，让他给风格——两种都行：
+
+**① DESIGN.md**：去 [styles.refero.design](https://styles.refero.design/) 挑一个喜欢的风格，下载 `DESIGN.md` 发过来。
 
 1. 把 DESIGN.md 的 `Quick Start` → `:root { … }` 变量块整段贴进 `src/styles/tokens.css`（保留它原有的 `--color-*` / `--text-*` / `--spacing-*` / `--radius-*` / `--surface-*`）。
 2. 把 `tokens.css` 下面的语义变量指过去：`--c-bg: var(--surface-canvas-white)`、`--c-ink: var(--color-…-black)`、`--c-accent: var(--color-…-accent)`、`--font-sans: var(--font-…)`、`--radius: var(--radius-buttons)`。
@@ -64,6 +66,10 @@ https://placehold.co/800x600/d8ded9/3c4a45/jpeg?text=CNC+parts
 4. 把它的 Do's and Don'ts 逐条落到代码里（例如「全部 0 圆角」「强调色一屏只出现一次」「标题全大写」「不要阴影」）。
 
 强调色优先换回客户自己的品牌色，别把别人的品牌色直接搬上线。完整映射表和例子见技能里的 `references/design-md.md`。
+
+**② 网站截图**：客户直接发"我想要这种"的截图（整页、桌面+手机各一张，圈出最想要的那块）。先从截图里提取骨架、栅格、留白节奏、配色、字体气质、组件形态，再按上面的方式映射进 `tokens.css`；草稿图仍用 placehold.co，配色跟截图走。需要快速看清结构时，可以用 [abi/screenshot-to-code](https://github.com/abi/screenshot-to-code) 生成一份 HTML 参考稿，但**不要直接交付**（它不是 Astro，也没有 SEO 文件、表单落库和部署链路）。做法与边界见技能里的 `references/screenshot-to-code.md`。
+
+两条路共同的红线：借结构与风格，不搬别人的 Logo、图片、字体文件和文案，不做 1:1 复刻。
 
 ## 目录
 

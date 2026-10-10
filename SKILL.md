@@ -1,6 +1,6 @@
 ---
 name: laoqin-langding-pages
-description: 通用落地页技能：帮 B2B 企业主把产品/工厂/服务信息做成 Astro 落地页，发布到 Cloudflare Pages 收询盘。触发场景：「做一个落地页」「做官网」「外贸独立站」「参考这个站设计落地页」「给我几个完全不同的版本」「多风格首页」「比稿」「从参考页抓事实写文案」「astro 建站」「部署到 Cloudflare」「网站要能收询盘」「截图自审」「生成配图」「按这份 DESIGN.md 做」「refero 风格」——用户带来 styles.refero.design 下载的 DESIGN.md 时，按它定风格再出草稿。默认交付：Astro 静态站 + 询盘表单 + Cloudflare Pages 上线，企业主只需回答几个问题。
+description: 通用落地页技能：帮 B2B 企业主把产品/工厂/服务信息做成 Astro 落地页，发布到 Cloudflare Pages 收询盘。触发场景：「做一个落地页」「做官网」「外贸独立站」「参考这个站设计落地页」「按这张截图做」「按这份 DESIGN.md 做」「refero 风格」「screenshot to code」「给我几个完全不同的版本」「多风格首页」「比稿」「从参考页抓事实写文案」「astro 建站」「部署到 Cloudflare」「网站要能收询盘」「截图自审」「生成配图」——客户给 DESIGN.md 或网站截图时，先按它定风格再出草稿。默认交付：Astro 静态站 + 询盘表单 + Cloudflare Pages 上线，企业主只需回答几个问题。
 license: MIT
 metadata:
   merged_from: [laoqin-langding-pages, ai-seo-site-builder]
@@ -62,7 +62,12 @@ metadata:
 
 给用户看过方向再往下写。用户说「你定」就选一个最稳的并说明理由。
 
-**可选：直接让用户挑现成风格。** 比起看三版比稿，也可以让用户去 [styles.refero.design](https://styles.refero.design/) 挑一个喜欢的网站风格，下载它的 `DESIGN.md` 发给你，你按那份文件落地草稿。问法、DESIGN.md 的结构、怎么映射进 `tokens.css`、怎么把它的 Do's and Don'ts 变成自检项，见 [references/design-md.md](references/design-md.md)。拿到 DESIGN.md 就跳过「给方向」，但**结构仍要按第 2 步自己定**，并且强调色优先换回客户品牌色。
+**可选：让客户直接给风格。** 比看三版比稿更快的一条路，两种输入都支持：
+
+- **DESIGN.md**——让客户去 [styles.refero.design](https://styles.refero.design/) 挑一个喜欢的网站风格，下载 `DESIGN.md` 发给你。变量块直接贴进 `tokens.css`，最省事。见 [references/design-md.md](references/design-md.md)。
+- **网站截图**——客户直接甩"我想要这种"的截图（或设计稿）。先提取结构 + 令牌，再落到 starter；需要时可以用 [abi/screenshot-to-code](https://github.com/abi/screenshot-to-code) 快速生成一份 HTML 参考稿帮你看结构，但那只是参考，不是交付物。见 [references/screenshot-to-code.md](references/screenshot-to-code.md)。
+
+走这两条时跳过「给方向」，但**结构仍要按第 2 步自己定**，强调色优先换回客户品牌色，截图里的第三方 Logo / 图片 / 文案一律不搬。
 
 ### 3. 落 Astro
 
@@ -104,7 +109,12 @@ npx wrangler pages deploy dist --project-name <project> --branch main
 
 ## 可选分支
 
-**A. 用 DESIGN.md 定风格** —— 用户从 [styles.refero.design](https://styles.refero.design/) 下载一份 `DESIGN.md` 发来时：按 [references/design-md.md](references/design-md.md) 把它的 CSS 变量贴进 `tokens.css`、把语义令牌指过去、按 Do's and Don'ts 改样式，再出草稿。强调色优先换回客户品牌色；原字族拿不到就用它给的 open 替代字体。
+**A. 按客户给的风格做** —— 两种输入：
+
+- `DESIGN.md`（来自 [styles.refero.design](https://styles.refero.design/)）：把它的 CSS 变量贴进 `tokens.css`、语义令牌指过去、按 Do's and Don'ts 改样式 → [references/design-md.md](references/design-md.md)
+- 网站截图 / 设计稿：先提取骨架、栅格、配色、字体气质，再落 starter；可选地用 [abi/screenshot-to-code](https://github.com/abi/screenshot-to-code) 生成 HTML 参考稿看结构 → [references/screenshot-to-code.md](references/screenshot-to-code.md)
+
+两种都要：强调色优先换回客户品牌色；原字族拿不到就用免费近似替代；**借结构不搬资产、不做 1:1 复刻**。
 
 **B. 多方案比稿** —— 用户拿不定设计方向，或说「给我三个完全不同的版本」时：一次一版做静态页面（`index.html` + `styles.css` + `app.js`，无构建），让用户挑，选定后按主线第 3 步迁进 Astro。做法与三套现成样例见 [references/design-directions.md](references/design-directions.md) 和 [examples/README.md](examples/README.md)。
 
@@ -118,7 +128,7 @@ npx wrangler pages deploy dist --project-name <project> --branch main
 - 手机 390 宽下 `scrollWidth === innerWidth`，无横向滚动
 - console 报错 0、4xx 0
 - 图片：草稿用 `placehold.co` 占位（尺寸与版面比例一致）；上线前确认已全部换成真图，没换的在交付说明里写明
-- 用了 DESIGN.md 时：它的 Do's and Don'ts 逐条对过（圆角、强调色出现次数、大小写、字距、阴影）
+- 用了 DESIGN.md 或参考截图时：硬规矩逐条对过（圆角、强调色出现次数、大小写、字距、阴影），并和参考图并排比一次
 - 表单：正常提交 / 蜜罐命中 / 伪造 token 被拒 / 重复提交被忽略（配了哪几项就测哪几项）
 - 接了邮件通知就确认真的收到了，不是只看到接口返回 200
 - 页面事实来源、没放的内容及原因、没验证的部分，都写进交付说明
@@ -156,6 +166,7 @@ npx wrangler pages deploy dist --project-name <project> --branch main
 | `references/landing-page-structure.md` | B2B 落地页怎么组织：按类型选结构、区块顺序、文案骨架、CTA 与表单策略、失败模式 |
 | `references/design-directions.md` | 多方案设计：方向从主题怎么长出来、三轴不重叠、AI 默认味清单、截图自审与出图 |
 | `references/design-md.md` | 可选项：用 styles.refero.design 的 DESIGN.md 定风格，结构解读、映射进 tokens.css、Do/Don't 转自检项 |
+| `references/screenshot-to-code.md` | 可选项：客户发来喜欢的网站截图，怎么要图、提取什么、两条执行路径（含 abi/screenshot-to-code）、边界与并排自审 |
 | `references/astro-project.md` | Astro 工程：目录、组件分层、样式令牌、多页扩展与依赖规则、SEO/可访问性清单 |
 | `references/deploy-cloudflare.md` | Cloudflare Pages 全流程：部署命令、密钥分类、D1/Turnstile/Resend、noindex 锁、域名、线上验证 |
 | `references/content-and-keywords.md` | 持续出内容：关键词导入、写作前分析、信息增益、反批量垃圾内容 |

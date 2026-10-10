@@ -16,14 +16,30 @@ const whatsappUrl = contact.whatsapp
     <div>
       <h2>{t.title}</h2>
       <p>{t.body}</p>
-      <ul>
-        <li>
-          Email: <a href={`mailto:${contact.email}`}>{contact.email}</a>
-        </li>
-        {whatsappUrl && <li><a href={whatsappUrl} rel="noopener">WhatsApp</a></li>}
-        {contact.phone && <li><a href={`tel:${contact.phone}`}>{contact.phone}</a></li>}
-        {contact.address && <li>{contact.address}</li>}
-      </ul>
+      {
+        (contact.email || whatsappUrl || contact.phone || contact.address) && (
+          <ul>
+            {contact.email && (
+              <li>
+                Email: <a href={`mailto:${contact.email}`}>{contact.email}</a>
+              </li>
+            )}
+            {whatsappUrl && (
+              <li>
+                <a href={whatsappUrl} rel="noopener">
+                  WhatsApp
+                </a>
+              </li>
+            )}
+            {contact.phone && (
+              <li>
+                <a href={`tel:${contact.phone}`}>{contact.phone}</a>
+              </li>
+            )}
+            {contact.address && <li>{contact.address}</li>}
+          </ul>
+        )
+      }
     </div>
 
     <form
